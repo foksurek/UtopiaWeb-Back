@@ -21,6 +21,7 @@ public class AccountRepositoryService(AppDbContext dbContext) : IAccountReposito
     {
         var dbUser = await dbContext.Users.Where(x => x.Id == id).FirstOrDefaultAsync();
         dbUser!.Name = newUsername;
+        dbUser.SafeName = newUsername.ToLower().Replace(" ", "_");
         await dbContext.SaveChangesAsync();
     }
 }

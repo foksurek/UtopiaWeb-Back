@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -15,10 +16,13 @@ using UtopiaWeb.ViewModels;
 namespace UtopiaWeb.Controllers;
 
 [ApiController]
-[Route("web/[controller]/")]
-public class AccountController(IAccountRepositoryService accountRepositoryService, PasswordService passwordService, AuthService authService) : Controller
+[Route("api/[controller]/")]
+public class AccountController(
+    IAccountRepositoryService accountRepositoryService, 
+    PasswordService passwordService,
+    AuthService authService,
+    IHttpResponseJsonService jsonResponseService) : Controller
 {
-    
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginModel model)
     {
@@ -39,18 +43,17 @@ public class AccountController(IAccountRepositoryService accountRepositoryServic
             
         };
         
-        return Ok(userData);
+        return Ok(jsonResponseService.Ok(userData));
 
 
     }
-    
     [Authorize]
     [HttpGet("logout")]
     public async Task<IActionResult> Logout()
     {
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         Response.Cookies.Delete("userData");
-        return Ok();
+        return Ok(jsonResponseService.Ok(""));
     }
     
     [Authorize]
@@ -64,7 +67,7 @@ public class AccountController(IAccountRepositoryService accountRepositoryServic
         };
 
         if (!await authService.CheckSession(HttpContext, User)) return Unauthorized();
-        return Ok(userJson);
+        return Ok(jsonResponseService.Ok(userJson));
     }
     
     
@@ -73,11 +76,12 @@ public class AccountController(IAccountRepositoryService accountRepositoryServic
     public async Task<IActionResult> ChangeUsername([FromBody] ChangeUsernameModel model)
     {
         if (!ModelState.IsValid) return BadRequest();
-        if (await accountRepositoryService.GetAccount(model.NewUsername) != null) return BadRequest("Username already exists");
+        if (await accountRepositoryService.GetAccount(model.NewUsername) != null)
+            return BadRequest(jsonResponseService.BadRequest(["Username is already taken"]));
         var id = int.Parse(User.FindFirst("Id")?.Value!);
         await accountRepositoryService.ChangeUsername(id, model.NewUsername);
         await authService.SignInAsync(HttpContext, (await accountRepositoryService.GetAccount(id)!)!);
-        return Ok();
+        return Ok(jsonResponseService.Ok("Username successfully changed"));
     }
 
 }

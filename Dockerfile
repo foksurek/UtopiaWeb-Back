@@ -7,10 +7,10 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["UtopiaWeb/UtopiaWeb.csproj", "UtopiaWeb/"]
-RUN dotnet restore "UtopiaWeb/UtopiaWeb.csproj"
+COPY ["UtopiaWeb.csproj", "./"]
+RUN dotnet restore "UtopiaWeb.csproj"
 COPY . .
-WORKDIR "/src/UtopiaWeb"
+WORKDIR "/src/"
 RUN dotnet build "UtopiaWeb.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish

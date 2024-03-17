@@ -26,6 +26,8 @@ public class UserDto
     [Column("id")] public int Id { get; set; }
     [Column("name")] public string Name { get; set; } 
     [Column("pw_bcrypt")] public string Password { get; set; }
+    [Column("safe_name")] public string SafeName { get; set; } 
+
 
     //
      
