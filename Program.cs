@@ -18,13 +18,25 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 });
 builder.Services.AddRouting(options => { options.LowercaseUrls = true; });
 //allow cors from every origin
+// builder.Services.AddCors(options =>
+// {
+//     options.AddDefaultPolicy(builder =>
+//     {
+//         builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+//     });
+// });
+
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(builder =>
     {
-        builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+        builder.WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
+
 builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
 {
     options.InvalidModelStateResponseFactory = actionContext =>
@@ -44,6 +56,8 @@ builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
         return new BadRequestObjectResult(result);
     };
 });
+
+
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
@@ -86,8 +100,11 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 builder.Services.AddTransient<PasswordService>();
 builder.Services.AddTransient<IAccountRepositoryService, AccountRepositoryService>();
+builder.Services.AddTransient<IBeatmapRespositoryService, BeatmapRespositoryService>();
+builder.Services.AddTransient<IScoreRepositoryService, ScoresRepositoryService>();
 builder.Services.AddTransient<AuthService>();
 builder.Services.AddScoped<IHttpResponseJsonService, HttpResponseJsonService>();
+builder.Services.AddScoped<IFileService, FileService>();
 
 var app = builder.Build();
 
@@ -95,6 +112,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    
 }
 
 app.UseExceptionHandler(error =>

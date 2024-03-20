@@ -1,13 +1,8 @@
 ﻿using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using UtopiaWeb.Contexts;
 using UtopiaWeb.Interfaces;
 using UtopiaWeb.Models;
 using UtopiaWeb.Services;
@@ -21,7 +16,10 @@ public class AccountController(
     IAccountRepositoryService accountRepositoryService, 
     PasswordService passwordService,
     AuthService authService,
-    IHttpResponseJsonService jsonResponseService) : Controller
+    IHttpResponseJsonService jsonResponseService,
+    IFileService fileService,
+    IConfiguration configuration
+    ) : Controller
 {
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginModel model)
@@ -80,8 +78,33 @@ public class AccountController(
             return BadRequest(jsonResponseService.BadRequest(["Username is already taken"]));
         var id = int.Parse(User.FindFirst("Id")?.Value!);
         await accountRepositoryService.ChangeUsername(id, model.NewUsername);
-        await authService.SignInAsync(HttpContext, (await accountRepositoryService.GetAccount(id)!)!);
+        await authService.SignInAsync(HttpContext, (await accountRepositoryService.GetAccount(id))!);
         return Ok(jsonResponseService.Ok("Username successfully changed"));
     }
-
+    
+    
+    [Authorize]
+    [HttpPost("uploadProfileFiles")]
+    public async Task<IActionResult> UploadAvatar(IFormFile? avatar, IFormFile? banner)
+    {
+        if (avatar == null && banner == null) return BadRequest(jsonResponseService.BadRequest(["No file was uploaded"]));
+        if (avatar != null)
+        {
+            if (avatar.Length > 8000000) return BadRequest(jsonResponseService.BadRequest(["Avatar is too large"]));
+            var id = int.Parse(User.FindFirst("Id")?.Value!);
+            var fileExtension = avatar.FileName.Split('.').Last();
+            await fileService.DeleteFile(configuration["FilePaths:Avatars"]!, id.ToString());
+            await fileService.SaveAvatar(configuration["FilePaths:Avatars"]!, id+ "." + fileExtension, avatar);
+        }
+        if (banner != null)
+        {
+            if (banner.Length > 8000000) return BadRequest(jsonResponseService.BadRequest(["Banner is too large"]));
+            var id = int.Parse(User.FindFirst("Id")?.Value!);
+            var fileExtension = banner.FileName.Split('.').Last();
+            await fileService.DeleteFile(configuration["FilePaths:Avatars"]!, id + "b");
+            await fileService.SaveFile(configuration["FilePaths:Avatars"]!, id + "b" + "." + fileExtension, banner);
+        }
+        
+        return Ok(jsonResponseService.Ok("Profile pictures successfully uploaded"));
+    }
 }
