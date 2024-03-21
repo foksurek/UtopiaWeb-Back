@@ -8,8 +8,11 @@ using UtopiaWeb.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddCors();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -17,25 +20,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySQL(builder.Configuration.GetConnectionString("MySQLConnection")!);
 });
 builder.Services.AddRouting(options => { options.LowercaseUrls = true; });
-//allow cors from every origin
-// builder.Services.AddCors(options =>
-// {
-//     options.AddDefaultPolicy(builder =>
-//     {
-//         builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
-//     });
-// });
 
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(builder =>
-    {
-        builder.WithOrigins("http://localhost:5173")
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials();
-    });
-});
 
 builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
 {
@@ -108,11 +93,14 @@ builder.Services.AddScoped<IFileService, FileService>();
 
 var app = builder.Build();
 
+app.UseCors(options =>
+{
+    options.WithOrigins("https://borsuq.xyz");
+});
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    
 }
 
 app.UseExceptionHandler(error =>
@@ -131,9 +119,8 @@ app.UseExceptionHandler(error =>
     });
 });
 
-app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapDefaultControllerRoute();
-app.MapControllers();
+app.MapControllerRoute(
+    name: "default", "{controller}/{action}");
 app.Run();
