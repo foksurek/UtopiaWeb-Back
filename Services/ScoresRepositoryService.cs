@@ -17,14 +17,20 @@ public class ScoresRepositoryService(AppDbContext dbContext) : IScoreRepositoryS
         throw new NotImplementedException();
     }
 
-    public async Task<IEnumerable<ScoreDto>> GetPlayerTop(int userId, int mode, int status, int limit = 20, int offset = 0)
+    public async Task<IEnumerable<ScoreDto>> GetPlayerTop(int userId, int mode, bool best = false, int limit = 20, int offset = 0)
     {
-        var data = await dbContext.Scores
-            .Where(s => s.UserId == userId && s.Mode == mode && s.Status == status)
-            .OrderByDescending(s => s.Pp)
+        if (best) 
+            return await dbContext.Scores
+                .Where(s => s.UserId == userId && s.Mode == mode && s.Status == 2)
+                .OrderByDescending(s => s.Pp)
+                .Skip(offset)
+                .Take(limit)
+                .ToListAsync();
+        return await dbContext.Scores
+            .Where(s => s.UserId == userId && s.Mode == mode)
+            .OrderByDescending(s => s.PlayTime)
             .Skip(offset)
             .Take(limit)
             .ToListAsync();
-        return data;
     }
 }

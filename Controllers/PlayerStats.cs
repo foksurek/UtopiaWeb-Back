@@ -16,8 +16,8 @@ public class PlayerStats(
     public async Task<IActionResult> GetScores(int id, int mode, string scope, int limit = 20, int offset = 0)
     {
         if (scope != "best" && scope != "recent") return BadRequest(responseService.BadRequest(["Invalid scope parameter"]));
-        var status = scope == "best" ? 2 : 0;
-        var scores = await scoresRepository.GetPlayerTop(id, mode, status, limit, offset);
+        var best = scope == "best";
+        var scores = await scoresRepository.GetPlayerTop(id, mode, best, limit, offset);
         var result = new List<object>();
         //TODO: cache beatmaps
         foreach (var score in scores)
