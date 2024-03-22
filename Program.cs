@@ -12,7 +12,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddCors();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -42,6 +41,17 @@ builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
     };
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin",
+        builder =>
+        {
+            builder.WithOrigins("http://localhost:5173")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        });
+});
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -93,10 +103,7 @@ builder.Services.AddScoped<IFileService, FileService>();
 
 var app = builder.Build();
 
-app.UseCors(options =>
-{
-    options.WithOrigins("https://borsuq.xyz");
-});
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -118,7 +125,7 @@ app.UseExceptionHandler(error =>
             }));
     });
 });
-
+app.UseCors("AllowSpecificOrigin");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllerRoute(

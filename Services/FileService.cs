@@ -13,7 +13,7 @@ public class FileService : IFileService
         var resizedImage = type switch
         {
             "avatar" => ResizeImage(image),
-            "banner" => ResizeImage(image, 1600, 900),
+            "banner" => ResizeImage(image, 2000, 1125),
             _ => image
         };
         await using var outputStream = File.Create(Path.Combine(path, fileName));
@@ -42,5 +42,10 @@ public class FileService : IFileService
         var bytes = Convert.FromBase64String(base64);
         using var ms = new MemoryStream(bytes);
         return await Image.LoadAsync(ms);
+    }
+
+    public async Task<string?> GetTextFromFile(string filePath)
+    {
+        return await (!File.Exists(filePath) ? null : File.ReadAllTextAsync(filePath))!;
     }
 }
