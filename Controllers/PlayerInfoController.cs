@@ -11,7 +11,7 @@ public class PlayerInfoController(
     IBeatmapRespositoryService beatmapRepository,
     IHttpResponseJsonService responseService,
     IAccountRepositoryService accountRepositoryService
-    ) : ControllerBase
+) : ControllerBase
 {
     [HttpGet("GetBadges")]
     public async Task<IActionResult> GetBadges(int id)
@@ -89,59 +89,59 @@ public class PlayerInfoController(
     //     return Ok(responseService.Ok(result));
     // }
     [HttpGet("GetScores")]
-public async Task<IActionResult> GetScores(int id, int mode, string scope, int limit = 20, int offset = 0)
-{
-    if (scope != "best" && scope != "recent") 
-        return BadRequest(responseService.BadRequest(["Invalid scope parameter"]));
-    
-    var best = scope == "best";
-    var scoresWithBeatmaps = await scoresRepository.GetPlayerTopWithBeatmaps(id, mode, best, limit, offset);
-    
-    var result = scoresWithBeatmaps.Select(tuple => new
+    public async Task<IActionResult> GetScores(int id, int mode, string scope, int limit = 20, int offset = 0)
     {
-        id = tuple.Score.Id,
-        score = tuple.Score.Score,
-        pp = tuple.Score.Pp,
-        acc = tuple.Score.Acc,
-        max_combo = tuple.Score.MaxCombo,
-        mods = tuple.Score.Mods,
-        n300 = tuple.Score.N300,
-        n100 = tuple.Score.N100,
-        n50 = tuple.Score.N50,
-        nmiss = tuple.Score.NMiss,
-        ngeki = tuple.Score.NGeki,
-        nkatu = tuple.Score.NKatu,
-        grade = tuple.Score.Grade,
-        status = tuple.Score.Status,
-        mode = tuple.Score.Mode,
-        play_time = tuple.Score.PlayTime,
-        time_elapsed = tuple.Score.TimeElapsed,
-        perfect = tuple.Score.Perfect,
-        beatmap = new
+        if (scope != "best" && scope != "recent") 
+            return BadRequest(responseService.BadRequest(["Invalid scope parameter"]));
+    
+        var best = scope == "best";
+        var scoresWithBeatmaps = await scoresRepository.GetPlayerTopWithBeatmaps(id, mode, best, limit, offset);
+    
+        var result = scoresWithBeatmaps.Select(tuple => new
         {
-            md5 = tuple.Beatmap.Md5,
-            id = tuple.Beatmap.Id,
-            set_id = tuple.Beatmap.SetId,
-            artist = tuple.Beatmap.Artist,
-            title = tuple.Beatmap.Title,
-            version = tuple.Beatmap.Version,
-            creator = tuple.Beatmap.Creator,
-            last_update = tuple.Beatmap.LastUpdate,
-            total_length = tuple.Beatmap.TotalLength,
-            max_combo = tuple.Beatmap.MaxCombo,
-            status = tuple.Beatmap.Status,
-            plays = tuple.Beatmap.Plays,
-            passes = tuple.Beatmap.Passes,
-            mode = tuple.Beatmap.Mode,
-            bpm = tuple.Beatmap.Bpm,
-            cs = tuple.Beatmap.CircleSize,
-            od = tuple.Beatmap.OverallDifficulty,
-            ar = tuple.Beatmap.ApproachRate,
-            hp = tuple.Beatmap.HealthDrain,
-            diff = tuple.Beatmap.Difficulty,
-        }
-    });
+            id = tuple.Score.Id,
+            score = tuple.Score.Score,
+            pp = tuple.Score.Pp,
+            acc = tuple.Score.Acc,
+            max_combo = tuple.Score.MaxCombo,
+            mods = tuple.Score.Mods,
+            n300 = tuple.Score.N300,
+            n100 = tuple.Score.N100,
+            n50 = tuple.Score.N50,
+            nmiss = tuple.Score.NMiss,
+            ngeki = tuple.Score.NGeki,
+            nkatu = tuple.Score.NKatu,
+            grade = tuple.Score.Grade,
+            status = tuple.Score.Status,
+            mode = tuple.Score.Mode,
+            play_time = tuple.Score.PlayTime,
+            time_elapsed = tuple.Score.TimeElapsed,
+            perfect = tuple.Score.Perfect,
+            beatmap = new
+            {
+                md5 = tuple.Beatmap.Md5,
+                id = tuple.Beatmap.Id,
+                set_id = tuple.Beatmap.SetId,
+                artist = tuple.Beatmap.Artist,
+                title = tuple.Beatmap.Title,
+                version = tuple.Beatmap.Version,
+                creator = tuple.Beatmap.Creator,
+                last_update = tuple.Beatmap.LastUpdate,
+                total_length = tuple.Beatmap.TotalLength,
+                max_combo = tuple.Beatmap.MaxCombo,
+                status = tuple.Beatmap.Status,
+                plays = tuple.Beatmap.Plays,
+                passes = tuple.Beatmap.Passes,
+                mode = tuple.Beatmap.Mode,
+                bpm = tuple.Beatmap.Bpm,
+                cs = tuple.Beatmap.CircleSize,
+                od = tuple.Beatmap.OverallDifficulty,
+                ar = tuple.Beatmap.ApproachRate,
+                hp = tuple.Beatmap.HealthDrain,
+                diff = tuple.Beatmap.Difficulty,
+            }
+        });
 
-    return Ok(responseService.Ok(result));
-}
+        return Ok(responseService.Ok(result));
+    }
 }
