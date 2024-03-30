@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using SixLabors.ImageSharp;
 using UtopiaWeb.Interfaces;
@@ -41,7 +42,6 @@ public class AccountController(
             id = user.Id
             
         };
-        
         return Ok(jsonResponseService.Ok(userData));
 
 
@@ -64,7 +64,6 @@ public class AccountController(
             name = User.FindFirst(ClaimTypes.Name)?.Value,
             id = User.FindFirst("Id")?.Value
         };
-
         if (!await authService.CheckSession(HttpContext, User)) return Unauthorized();
         return Ok(jsonResponseService.Ok(userJson));
     }

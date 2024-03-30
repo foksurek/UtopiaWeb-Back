@@ -46,6 +46,7 @@ public class FileService : IFileService
 
     public async Task<string?> GetTextFromFile(string filePath)
     {
-        return await (!File.Exists(filePath) ? null : File.ReadAllTextAsync(filePath))!;
+         if (File.Exists(filePath)) return await File.ReadAllTextAsync(filePath);
+         return null;
     }
 }

@@ -24,9 +24,13 @@ namespace UtopiaWeb.Dto;
 public class UserDto
 {
     [Column("id")] public int Id { get; set; }
-    [Column("name")] public string Name { get; set; } 
-    [Column("pw_bcrypt")] public string Password { get; set; }
-    [Column("safe_name")] public string SafeName { get; set; } 
+    [Column("name")] public string Name { get; set; } = null!;
+    [Column("pw_bcrypt")] public string Password { get; set; } = null!;
+    [Column("safe_name")] public string SafeName { get; set; } = null!; 
+    [Column("userpage_content")] public string? UserpageContent { get; set; }
+    // [Column("badges")] public string? Badges { get; set; }
+
+    
 
 
     //

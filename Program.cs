@@ -8,6 +8,15 @@ using UtopiaWeb.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(
+        policy  =>
+        {
+            policy.WithOrigins("https://osu.borsuq.xyz", "http://localhost:5173")
+                .AllowCredentials().AllowAnyHeader().AllowAnyMethod();
+        });
+});
 
 
 builder.Services.AddEndpointsApiExplorer();
@@ -41,17 +50,8 @@ builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
     };
 });
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowSpecificOrigin",
-        builder =>
-        {
-            builder.WithOrigins("http://localhost:5173")
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials();
-        });
-});
+
+
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -60,7 +60,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.ExpireTimeSpan = TimeSpan.FromDays(7);
         options.Cookie.Name = "UtopiaWeb";
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.SameSite = SameSiteMode.None;
         options.Events.OnRedirectToLogin = context =>
         {
             context.Response.StatusCode = StatusCodes.Status401Unauthorized;
@@ -102,7 +102,7 @@ builder.Services.AddScoped<IHttpResponseJsonService, HttpResponseJsonService>();
 builder.Services.AddScoped<IFileService, FileService>();
 
 var app = builder.Build();
-
+app.UseCors();
 
 if (app.Environment.IsDevelopment())
 {
@@ -125,7 +125,7 @@ app.UseExceptionHandler(error =>
             }));
     });
 });
-app.UseCors("AllowSpecificOrigin");
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllerRoute(

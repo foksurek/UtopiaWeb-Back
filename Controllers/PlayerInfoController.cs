@@ -1,16 +1,33 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Mvc;
 using UtopiaWeb.Interfaces;
 
 namespace UtopiaWeb.Controllers;
 
 [ApiController]
 [Route("/api/[controller]")]
-public class PlayerStats(
+public class PlayerInfoController(
     IScoreRepositoryService scoresRepository,
     IBeatmapRespositoryService beatmapRepository,
-    IHttpResponseJsonService responseService
+    IHttpResponseJsonService responseService,
+    IAccountRepositoryService accountRepositoryService
     ) : ControllerBase
 {
+    [HttpGet("GetBadges")]
+    public async Task<IActionResult> GetBadges(int id)
+    {
+        if (!await accountRepositoryService.AccountExists(id)) return NotFound(responseService.NotFound("User not found"));
+        var badges = await accountRepositoryService.GetBadges(id);
+        var data = new
+        {
+            badges = badges.Select(x => new
+            {
+                id = x.Id,
+                description = x.Description
+            })
+        };
+        return Ok(responseService.Ok(data));
+    }
     
     [HttpGet("GetScores")]
     public async Task<IActionResult> GetScores(int id, int mode, string scope, int limit = 20, int offset = 0)

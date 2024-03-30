@@ -10,4 +10,6 @@ public class AppDbContext : DbContext
     public DbSet<UserDto> Users { get; set; } = null!;
     public DbSet<BeatmapDto> Beatmaps { get; set; } = null!;
     public DbSet<ScoreDto> Scores { get; set; } = null!;
+    public DbSet<BadgeDto> Badges { get; set; } = null!;
+    public DbSet<PlayerBadgeDto> PlayerBadges { get; set; } = null!;
 }

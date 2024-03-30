@@ -16,6 +16,16 @@ public class AccountRepositoryService(AppDbContext dbContext) : IAccountReposito
     {
         return await dbContext.Users.Where(x => x.Id == id).FirstOrDefaultAsync();
     }
+    
+    public async Task<bool> AccountExists(string username)
+    {
+        return await dbContext.Users.AnyAsync(x => x.Name == username);
+    }
+    
+    public async Task<bool> AccountExists(int id)
+    {
+        return await dbContext.Users.AnyAsync(x => x.Id == id);
+    }
 
     public async Task ChangeUsername(int id, string newUsername)
     {
@@ -23,5 +33,14 @@ public class AccountRepositoryService(AppDbContext dbContext) : IAccountReposito
         dbUser!.Name = newUsername;
         dbUser.SafeName = newUsername.ToLower().Replace(" ", "_");
         await dbContext.SaveChangesAsync();
+    }
+    
+    public async Task<List<BadgeDto>> GetBadges(int id)
+    {
+        return await dbContext.PlayerBadges
+            .Include(b => b.Badge)
+            .Where(x => x.UserId == id)
+            .Select(x => x.Badge)
+            .ToListAsync();
     }
 }
